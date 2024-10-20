@@ -1,0 +1,48 @@
+services:
+    app:
+        image: php:8.0-apache
+        container_name: laravel-app
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/var/www/html
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini # Custom PHP config (opsional)
+        ports:
+            - "8000:80" # Mengakses Laravel di http://localhost:8000
+        environment:
+            - APACHE_DOCUMENT_ROOT=/var/www/html/public
+            - APP_ENV=local
+            - DB_HOST=db
+            - DB_PORT=3306
+            - DB_DATABASE=coding-test
+            - DB_USERNAME=ddn
+            - DB_PASSWORD=password
+        depends_on:
+            - db
+
+    db:
+        image: mysql:8.0
+        container_name: laravel-db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: "coding-test"
+            MYSQL_USER: "ddn"
+            MYSQL_PASSWORD: "password"
+        ports:
+            - 8000:3306
+        volumes:
+            - db_data:/var/lib/mysql
+
+    redis: # Jika menggunakan Redis untuk caching/queue
+        image: redis:alpine
+        container_name: laravel-redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+
+volumes:
+    db_data:
+    redis_data:
